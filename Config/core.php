@@ -32,7 +32,7 @@
  * In production mode, flash messages redirect after a time interval.
  * In development mode, you need to click the flash message to continue.
  */
-	Configure::write('debug', 0);
+	Configure::write('debug', 1);
 
 /**
  * Configure the Error handler used to handle errors for your application.  By default
@@ -53,7 +53,7 @@
 		'level' => E_ALL & ~E_DEPRECATED,
 		'trace' => true
 	));
-
+Configure::write('emailSender','noreply@example.com');
 /**
  * Configure the Exception handler used for uncaught exceptions.  By default,
  * ErrorHandler::handleException() is used. It will display a HTML page for the exception, and
@@ -110,7 +110,7 @@
  *	`manager_index()` and `/manager/controller/index`
  *
  */
-	//Configure::write('Routing.prefixes', array('admin'));
+	Configure::write('Routing.prefixes', array('admin'));
 
 /**
  * Turn off all caching application-wide.
@@ -184,12 +184,12 @@
 /**
  * A random string used in security hashing methods.
  */
-	Configure::write('Security.salt', 'asdasdasd');
+	Configure::write('Security.salt', 'sdsd');
 
 /**
  * A random numeric string (digits only) used to encrypt/decrypt strings.
  */
-	Configure::write('Security.cipherSeed', 'asdasdasd');
+	Configure::write('Security.cipherSeed', 'sdsd');
 
 /**
  * Apply timestamps with the last modified time to static assets (js, css, images).

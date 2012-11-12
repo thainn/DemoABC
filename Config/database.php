@@ -65,7 +65,7 @@ class DATABASE_CONFIG {
 		'host' => 'localhost',
 		'login' => 'root',
 		'password' => '',
-		'database' => '',
+		'database' => 'demo',
 		'prefix' => '',
 		'encoding' => 'utf8',
 	);
@@ -76,8 +76,8 @@ class DATABASE_CONFIG {
 		'host' => 'localhost',
 		'login' => 'user',
 		'password' => 'password',
-		'database' => 'test_database_name',
+		'database' => 'leverages_db',
 		'prefix' => '',
-		//'encoding' => 'utf8',
+		'encoding' => 'utf8',
 	);
 }

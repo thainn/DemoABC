@@ -143,7 +143,7 @@ Cache::config('default', array('engine' => 'File'));
  *
  */
 
-
+CakePlugin::loadAll();
 /**
  * You can attach event listeners to the request lifecyle as Dispatcher Filter . By Default CakePHP bundles two filters:
  *
@@ -179,3 +179,36 @@ CakeLog::config('error', array(
 	'types' => array('warning', 'error', 'critical', 'alert', 'emergency'),
 	'file' => 'error',
 ));
+
+
+Configure::write('baseurl',  'http://localhost/demo/');
+Configure::write('PAGINATION_LIMIT',  '10');
+
+Configure::write('LIMIT_NEWS',  10);
+Configure::write('LIMIT_NEWS_HOME',  10);
+Configure::write('LIMIT_NEWS_RECRUIT',  10);
+Configure::write('LIMIT_RECRUIT',  10);
+Configure::write('LIMIT_CHART_TITLE_RECRUIT',  60);
+Configure::write('LIMIT_CHART_TITLE_NEWS',  60);
+Configure::write('FILE_TYPE_UPLOAD',  array('application/pdf','application/msword','application/vnd.ms-excel'));
+Configure::write('PATH_UPLOAD_CV',  '../webroot/files/');
+
+Configure::write('LIMIT_CONTACT',  10);
+Configure::write('LIMIT_CANDIDATE',  10);
+
+Configure::write('LIMIT_ADMINRECRUIT',  6);
+Configure::write('LIMIT_ADMINCONTACT',  6);
+Configure::write('LIMIT_ADMINNEWS',  6);
+
+Configure::write('DELETE_CONFIRM',  'Bạn có chắc chắn xóa không?');
+Configure::write('ERR_TITLE_BLANK',  'Tiêu đề không được để trống');
+Configure::write('ERR_SAVING_DATA',  'Đã xảy ra lỗi trong quá trình lưu, xin vui lòng thử lại sau.');
+Configure::write('ERR_DELETING_DATA', 'Không thể xóa dữ liệu. Vui lòng thử lại sau.');
+Configure::write('ERR_UNVALID_DATE',  'Ngày bắt đầu và ngày kết thúc không hợp lệ');
+Configure::write('ERR_NOTVALID_URL',  'URL không có thực');
+
+Configure::write('ERR_PUBLISHDATE_BLANK',  'Ngày giờ đăng không được để trống');
+Configure::write('ERR_STARTDATE_BLANK',  'Ngày bắt đầu không được để trống');
+
+Configure::write('UPDATE_SUCCESS', 'Thông tin cập nhật đã được lưu');
+Configure::write('DELETE_SUCCESS', 'Thông tin đã được xóa');
