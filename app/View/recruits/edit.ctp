@@ -8,7 +8,7 @@
 
 
 <?php
-    echo $this->Form->create('News', array('action' => 'edit')); 
+    echo $this->Form->create('Recruit', array('action' => 'edit')); 
     echo $this->Form->input('title');
     echo $this->Form->input('content', array('rows' => '3'));
     echo $this->Form->input('id', array('type' => 'hidden'));

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 12, 2012 at 03:07 AM
+-- Generation Time: Nov 12, 2012 at 03:45 AM
 -- Server version: 5.5.27
 -- PHP Version: 5.4.7
 
@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
 
 CREATE TABLE IF NOT EXISTS `news` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
   `title` varchar(200) NOT NULL,
   `content` text,
   `created` datetime NOT NULL,
@@ -108,12 +109,20 @@ CREATE TABLE IF NOT EXISTS `news` (
 
 CREATE TABLE IF NOT EXISTS `recruits` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
   `title` varchar(200) NOT NULL,
   `created` datetime NOT NULL,
   `content` text,
   `status` tinyint(2) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `recruits`
+--
+
+INSERT INTO `recruits` (`id`, `user_id`, `title`, `created`, `content`, `status`) VALUES
+(1, 0, 'hà nội', '0000-00-00 00:00:00', 'thành phố hồ chí minh', 0);
 
 -- --------------------------------------------------------
 

@@ -5,9 +5,25 @@ class ExportController extends AppController {
     * Export index
     *
     */
+    
     var $uses = array('Recruit');
+    function beforeFilter() {
+                parent::beforeFilter();
+                $this->Auth->allow(array('*'));
+        }
     function index() {
-      $this->_pdf();
+          if($this->request->isPost())
+          {
+              $data = $this->request->data;
+             // var_dump($data);exit;
+              if($data['exportCSV'])
+              {
+                  $this->_csv();
+              }else if($data['exportPDF'])
+              {
+                  $this->_pdf();
+              }
+          }
     }
     /**
     *
@@ -16,6 +32,7 @@ class ExportController extends AppController {
     */
     function _csv()
     {
+            Configure::write('debug', 0);
             ini_set('max_execution_time', 600); //increase max_execution_time to 10 min if data set is very large
 
             //create a file
@@ -45,6 +62,7 @@ class ExportController extends AppController {
     }
     function _pdf()
     {
+        Configure::write('debug', 0);
         App::import('Vendor','xtcpdf');  
         $tcpdf = new XTCPDF(); 
         $textfont = 'freesans'; // looks better, finer, and more condensed than 'dejavusans' 

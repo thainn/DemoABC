@@ -17,28 +17,28 @@
 	</tr>
 	<?php
 	$i = 0;
-	foreach ($news as $news):
+	foreach ($rercuit as $rercuit):
 		$class = null;
 		if ($i++ % 2 == 0) {
 			$class = ' class="altrow"';
 		}
 	?>
 	<tr<?php echo $class;?>>
-		<td><?php echo $news['News']['id']; ?>&nbsp;</td>
+		<td><?php echo $rercuit['Recruit']['id']; ?>&nbsp;</td>
 		
-		<td><?php echo $news['News']['title']; ?>&nbsp;</td>
-		<td><?php echo $news['News']['content']; ?>&nbsp;</td>
-                <td><?php echo $news['News']['created']; ?>&nbsp;</td>
+		<td><?php echo $rercuit['Recruit']['title']; ?>&nbsp;</td>
+		<td><?php echo $rercuit['Recruit']['content']; ?>&nbsp;</td>
+                <td><?php echo $rercuit['Recruit']['created']; ?>&nbsp;</td>
                 <?php 
                 $username='2';
-                        if($news['News']['user_id']==$username || $username=='1' )  //username ==1 la admin
+                        if($rercuit['Recruit']['user_id']==$username || $username=='1' )  //username ==1 la admin
                         {
                             
                   ?>
 		<td class="actions">
-			<?php echo $this->Html->link(__('View', true), array('action' => 'view', $news['News']['id'])); ?>
-			<?php echo $this->Html->link(__('Edit', true), array('action' => 'edit', $news['News']['id'])); ?>
-			<?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $news['News']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $news['News']['id'])); ?>
+			<?php echo $this->Html->link(__('View', true), array('action' => 'view', $rercuit['Recruit']['id'])); ?>
+			<?php echo $this->Html->link(__('Edit', true), array('action' => 'edit', $rercuit['Recruit']['id'])); ?>
+			<?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $rercuit['Recruit']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $rercuit['Recruit']['id'])); ?>
 		</td>
                 <?php } ?>
 	</tr>

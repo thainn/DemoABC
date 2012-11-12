@@ -20,9 +20,9 @@
     </tr>
 
     <tr>
-        <td><?php echo $news['News']['id'];?></td>
-        <td><?php echo $news['News']['title'];?></td>
-		<td><?php echo $news['News']['content'];?></td>
+        <td><?php echo $rercuit['Recruit']['id'];?></td>
+        <td><?php echo $rercuit['Recruit']['title'];?></td>
+		<td><?php echo $rercuit['Recruit']['content'];?></td>
 
     </tr>
  
