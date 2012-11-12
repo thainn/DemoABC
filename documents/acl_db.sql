@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `news` (
   `title` varchar(200) NOT NULL,
   `content` text,
   `created` datetime NOT NULL,
-  `status` tinyint(1) DEFAULT '0' COMMENT 'status = -1:deleted, 0:default add, 1:published ',
+  `status` tinyint(2) DEFAULT '0' COMMENT 'status = -1:deleted, 0:default add, 1:published ',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `recruits` (
   `title` varchar(200) NOT NULL,
   `created` datetime NOT NULL,
   `content` text,
-  `status` tinyint(1) DEFAULT '0',
+  `status` tinyint(2) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
