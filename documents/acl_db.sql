@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 09, 2012 at 10:06 AM
+-- Generation Time: Nov 12, 2012 at 03:07 AM
 -- Server version: 5.5.27
 -- PHP Version: 5.4.7
 
@@ -19,6 +19,57 @@ SET time_zone = "+00:00";
 --
 -- Database: `acl_db`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `acos`
+--
+
+CREATE TABLE IF NOT EXISTS `acos` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `parent_id` int(10) DEFAULT NULL,
+  `model` varchar(255) DEFAULT '',
+  `foreign_key` int(10) unsigned DEFAULT NULL,
+  `alias` varchar(255) DEFAULT '',
+  `lft` int(10) DEFAULT NULL,
+  `rght` int(10) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `aros`
+--
+
+CREATE TABLE IF NOT EXISTS `aros` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `parent_id` int(10) DEFAULT NULL,
+  `model` varchar(255) DEFAULT '',
+  `foreign_key` int(10) unsigned DEFAULT NULL,
+  `alias` varchar(255) DEFAULT '',
+  `lft` int(10) DEFAULT NULL,
+  `rght` int(10) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `aros_acos`
+--
+
+CREATE TABLE IF NOT EXISTS `aros_acos` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `aro_id` int(10) unsigned NOT NULL,
+  `aco_id` int(10) unsigned NOT NULL,
+  `_create` char(2) NOT NULL DEFAULT '0',
+  `_read` char(2) NOT NULL DEFAULT '0',
+  `_update` char(2) NOT NULL DEFAULT '0',
+  `_delete` char(2) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -45,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `news` (
   `title` varchar(200) NOT NULL,
   `content` text,
   `created` datetime NOT NULL,
-  `status` tinyint(1) DEFAULT '0',
+  `status` tinyint(1) DEFAULT '0' COMMENT 'status = -1:deleted, 0:default add, 1:published ',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
