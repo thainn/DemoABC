@@ -5,6 +5,10 @@ class User extends AppModel {
     var $name = 'User';
     var $actsAs = array('Acl' => array('type' => 'requester'));
     var $belongsTo = array( 'Group' => array( 'className' => 'Group'));
+    var $hasmany = array( 'Recruit' => array( 'className' => 'Recruit'),
+                           'News'   => array( 'className' => 'News'),
+        
+        );
     
     function parentNode() {
     	if (!$this->id && empty($this->data)) {
