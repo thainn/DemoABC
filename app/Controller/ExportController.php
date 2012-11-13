@@ -49,12 +49,21 @@ class ExportController extends AppController {
         header("content-type:application/csv;charset=UTF-8");
         header('Content-Disposition: attachment; filename="'.$filename.'"');
         $conditions = array();
-        if($usrID = intval($this->usrID))
+        $usrID = intval($this->usrID);
+        if(!empty($usrID) and !empty($this->to_date))
         {
-            $conditions[] = array('user_id'=>$usrID);
+            $conditions[] = array('user_id'=>$usrID,'created BETWEEN ? AND ? '=> array($this->from_date,$this->to_date));
+        }else if(!empty($usrID))
+        {
+             $conditions[] = array('user_id'=>$usrID);
         }
+        else if(!empty($this->to_date))
+        {
+             $conditions[] = array('created BETWEEN ? AND ? '=> array($this->from_date,$this->to_date));
+        } 
         $results = $this->Recruit->find("all",array('conditions' => $conditions));
         $this->set('data',$results);
+       // var_dump($results);
         // The column headings of your .csv file
         $header_row = array("Id", "User", "Title", "Content", "Created", "Status");
         fputcsv($csv_file,$header_row,',','"');
@@ -64,7 +73,7 @@ class ExportController extends AppController {
                 // Array indexes correspond to the field names in your db table(s)
                 $row = array(
                         $result['Recruit']['id'],
-                        $result['User']['username'],
+                        $result['Recruit']['user_id'],
                         $result['Recruit']['title'],
                         $result['Recruit']['content'],
                         date('d/m/Y',  strtotime($result['Recruit']['created'])),
@@ -78,13 +87,21 @@ class ExportController extends AppController {
     function _pdf()
     {
         Configure::write('debug', 0);
-        if($usrID = intval($this->usrID))
+         $conditions = array();
+        $usrID = intval($this->usrID);
+        if(!empty($usrID) and !empty($this->to_date))
         {
-            $data = $this->Recruit->find("all",array('conditions' => array('user_id' => $usrID)));
-        }else
+            $conditions[] = array('user_id'=>$usrID,'created BETWEEN ? AND ? '=> array($this->from_date,$this->to_date));
+        }else if(!empty($usrID))
         {
-            $data = $this->Recruit->find("all");
+             $conditions[] = array('user_id'=>$usrID);
         }
+        else if(!empty($this->to_date))
+        {
+             $conditions[] = array('created BETWEEN ? AND ? '=> array($this->from_date,$this->to_date));
+        }
+        $data = $this->Recruit->find("all",array('conditions' => $conditions));
+        
         App::import('Vendor','xtcpdf');  
         $tcpdf = new XTCPDF(); 
         $textfont = 'dejavusans'; // looks better, finer, and more condensed than 'dejavusans' 
@@ -100,7 +117,7 @@ class ExportController extends AppController {
        
         foreach ($data as $vdata)
         {
-            $html  .= '<tr><td>'.$vdata['Recruit']['id'].'</td><td>'.$vdata['User']['username'].'</td><td>'.$vdata['Recruit']['title'].'</td><td>'.$vdata['Recruit']['content'].'</td><td>'.date('d/m/Y',  strtotime($vdata['Recruit']['created'])).'</td><td>'.$vdata['Recruit']['status'].'</td></tr>';
+            $html  .= '<tr><td>'.$vdata['Recruit']['id'].'</td><td>'.$vdata['Recruit']['user_id'].'</td><td>'.$vdata['Recruit']['title'].'</td><td>'.$vdata['Recruit']['content'].'</td><td>'.date('d/m/Y',  strtotime($vdata['Recruit']['created'])).'</td><td>'.$vdata['Recruit']['status'].'</td></tr>';
         }
         
         $html  .= '</table>';
