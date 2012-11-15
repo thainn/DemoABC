@@ -1,31 +1,35 @@
 <?php
-
+App::uses('AuthComponent', 'Controller/Component');
 class User extends AppModel {
 
-    var $name = 'User';
-    var $actsAs = array('Acl' => array('type' => 'requester'));
-    var $belongsTo = array( 'Group' => array( 'className' => 'Group'));
-    
-    function parentNode() {
-    	if (!$this->id && empty($this->data)) {
-    		return null;
-    	}
-    	if (isset($this->data['User']['group_id'])) {
-    		$groupId = $this->data['User']['group_id'];
-    	} else {
-    		$groupId = $this->field('group_id');
-    	}
-    	if (!$groupId) {
-    		return null;
-    	} else {
-    		return array('Group' => array('id' => $groupId));
-    	}
-    }
-    
-    public function beforeSave($options = array()) {
-    	if (isset($this->data[$this->alias]['password'])) {
-    		$this->data[$this->alias]['password'] = AuthComponent::password($this->data[$this->alias]['password']);
-    	}
-    	return true;
-    }
+	var $name = 'User';
+	var $belongsTo = array('Group');
+	var $actsAs = array('Acl' => array('type' => 'requester'));
+	
+	function parentNode() {
+		if (!$this->id && empty($this->data)) {
+			return null;
+		}
+		if (isset($this->data['User']['group_id'])) {
+			$groupId = $this->data['User']['group_id'];
+		} else {
+			$groupId = $this->field('group_id');
+		}
+		if (!$groupId) {
+			return null;
+		} else {
+			return array('Group' => array('id' => $groupId));
+		}
+	}
+	
+	function bindNode($user) {
+		return array('model' => 'Group', 'foreign_key' => $user['User']['group_id']);
+	}
+	
+	
+	public function beforeSave($options = array()) {
+		$this->data['User']['password'] = AuthComponent::password($this->data['User']['password']);
+		return true;
+	}
+
 }

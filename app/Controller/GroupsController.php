@@ -10,7 +10,7 @@ class GroupsController extends AppController {
 
 	function beforeFilter() {
 		parent::beforeFilter();
-// 		$this->Auth->allow(array('*'));
+		$this->Auth->allow(array('*'));
 	}
 	
 	function add() {
@@ -30,16 +30,116 @@ class GroupsController extends AppController {
 		$this->set('groups', $this->paginate());
 	}
 
-	function view($id=null) {
 
+	function permission(){
+		if ($this->request->is('post')) {
+		 	$this->_setPermission();
+		}
+		$this->_initPermission();
 	}
 
-	function edit($id=null) {
+	function _setPermission() {
+		$this->Acl->Aco->unbindModel(array('hasAndBelongsToMany' => array('Aro')));
+		$rules_temp = $this->Acl->Aco->find('all');
+		
+		$rules = array();
+		foreach($rules_temp as $item){
+			$rules[$item['Aco']['id']] = $item;
+		}
 
+		$permissions = $this->request->data['permission'];
+		foreach($permissions as $key=>$permission){
+			$sql = 'delete from  aros_acos WHERE aro_id =' . $key;
+			$this->Acl->Aco->query($sql);
+			
+			$group = &$this->Group;
+			$group->id = $key; 
+			
+			$parent_id  	= 0;
+			$run_deny_all 	= 1;
+			
+			foreach($permission as $permission_key=>$permission_value){
+				$level = 2; 
+				$rolename = $this->_parseToPermissionName($rules, $permission_value, $level);
+				if($level == 0){
+					$this->Acl->allow($group, $rolename);
+					break;
+				}elseif($level == 1){
+					if($run_deny_all) $this->Acl->deny($group, 'controllers'); //using white list, deny all permission first.
+					
+					$parent_id 		= $permission_value;
+					$run_deny_all 	= 0;
+					
+					$this->Acl->allow($group, $rolename);
+					continue;
+				}else{
+					if($rules[$permission_value]['Aco']['parent_id'] == $parent_id) {
+						continue;
+					}
+					$this->Acl->allow($group, $rolename);
+				}
+			}
+		}
 	}
-
-	function delete($id=null) {
-
+	
+	function _parseToPermissionName($rules = array(), $ruleId = 0, &$level){
+		if(!$rules || !$ruleId) return '';
+		
+		$rule = $rules[$ruleId]['Aco'];
+		if(!$rule) return '';
+		
+		if(is_null($rule['parent_id'])) $level = 0;
+		elseif($rule['parent_id'] == 1) $level = 1;
+		
+		if($level < 2) return $rule['alias'];
+		$rulename = '';
+		$parent_name = $rules[$rule['parent_id']]['Aco']['alias'];
+		
+		return $parent_name.'/'.$rule['alias'];
+	}
+	
+	function _initPermission(){
+		$groups = $this->Group->find('all');
+		
+		$temp_permission = $this->Acl->Aco->find('all');
+		$permission = array();
+		
+		foreach($temp_permission as $item){
+			$temp = array();
+		
+			foreach($item['Aro'] as $group) {
+				$final_permission = 0;
+		
+				$flag = $group['Permission']['_create'] + $group['Permission']['_read'] +
+				$group['Permission']['_update'] + $group['Permission']['_delete'];
+		
+				if($flag > 0)
+					$final_permission = 1;
+		
+				$temp[$group['foreign_key']] = $final_permission;
+			}
+			$permission[$item['Aco']['id']] = $temp;
+		}
+		
+		$this->Acl->Aco->unbindModel(array('hasAndBelongsToMany' => array('Aro')));
+		$rules = $this->Acl->Aco->find('all');
+		
+		$this->Acl->Aro->unbindModel(array('hasAndBelongsToMany' => array('Aco')));
+		$arostemp = $this->Acl->Aro->find('all');
+		$aros = array();
+		foreach($arostemp as $item){
+			if($item['Aro']['model'] == 'Group')
+				$aros[$item['Aro']['foreign_key']] = $item;
+		}
+		
+		$this->set('rules', $rules);
+		$this->set('aros', $aros);
+		$this->set('groups', $groups);
+		$this->set('permission', $permission);
+		
+// 		print "<pre>";
+// 		print_r($aros);
+// 		print "</pre>";
 	}
 	
 	function build_acl() {
@@ -47,7 +147,6 @@ class GroupsController extends AppController {
 			return $this->_stop();
 		}
 		$log = array();
-	
 		$aco =& $this->Acl->Aco;
 		$root = $aco->node('controllers');
 		if (!$root) {
@@ -58,25 +157,29 @@ class GroupsController extends AppController {
 		} else {
 			$root = $root[0];
 		}
-	
 		App::import('Core', 'File');
 		$Controllers = App::objects('controller');
+		
+		// we need the name, not the fullname, so trim 'Controller' from it.
+		foreach($Controllers as $key=>$value){
+			$Controllers[$key] = str_replace('Controller', '', $value);
+		}
+	
 		$appIndex = array_search('App', $Controllers);
 		if ($appIndex !== false ) {
 			unset($Controllers[$appIndex]);
 		}
+		
 		$baseMethods = get_class_methods('Controller');
-		$baseMethods[] = 'buildAcl';
-	
+		$baseMethods[] = 'build_acl';
+		
 		$Plugins = $this->_getPluginControllerNames();
 		$Controllers = array_merge($Controllers, $Plugins);
-		print "<pre>";
-		print_r($Controllers);
-		print "</pre>";exit;
+		
 		// look at each controller in app/controllers
 		foreach ($Controllers as $ctrlName) {
 			$methods = $this->_getClassMethods($this->_getPluginControllerPath($ctrlName));
-	
+			
 			// Do all Plugins First
 			if ($this->_isPlugin($ctrlName)){
 				$pluginNode = $aco->node('controllers/'.$this->_getPluginName($ctrlName));
@@ -105,8 +208,8 @@ class GroupsController extends AppController {
 			} else {
 				$controllerNode = $controllerNode[0];
 			}
-	
 			//clean the methods. to remove those in Controller and private actions.
+			if($methods)
 			foreach ($methods as $k => $method) {
 				if (strpos($method, '_', 0) === 0) {
 					unset($methods[$k]);
@@ -127,29 +230,33 @@ class GroupsController extends AppController {
 		if(count($log)>0) {
 			debug($log);
 		}
+		print "<pre>";
+		print_r('game over');
+		print "</pre>";
+		exit;
 	}
 	
 	function _getClassMethods($ctrlName = null) {
 		App::import('Controller', $ctrlName);
+		
 		if (strlen(strstr($ctrlName, '.')) > 0) {
 			// plugin's controller
 			$num = strpos($ctrlName, '.');
-			$ctrlName = substr($ctrlName, $num+1);
+			$ctrlName = substr($ctrlName, $num + 1);
 		}
-		
-		$ctrlclass = $ctrlName;// . 'Controller';
+		$ctrlclass =  $ctrlName . 'Controller';
 		$methods = get_class_methods($ctrlclass);
 		
 		// Add scaffold defaults if scaffolds are being used
 		$properties = get_class_vars($ctrlclass);
-		if (array_key_exists('scaffold', $properties)) {
+		if($properties)
+		if (array_key_exists('scaffold', $properties) && $properties['scaffold']) {
 			if($properties['scaffold'] == 'admin') {
 				$methods = array_merge($methods, array('admin_add', 'admin_edit', 'admin_index', 'admin_view', 'admin_delete'));
 			} else {
 				$methods = array_merge($methods, array('add', 'edit', 'index', 'view', 'delete'));
 			}
 		}
-		
 		return $methods;
 	}
 	
@@ -161,7 +268,6 @@ class GroupsController extends AppController {
 			return false;
 		}
 	}
-	
 	function _getPluginControllerPath($ctrlName = null) {
 		$arr = String::tokenize($ctrlName, '/');
 		if (count($arr) == 2) {
@@ -170,7 +276,6 @@ class GroupsController extends AppController {
 			return $arr[0];
 		}
 	}
-	
 	function _getPluginName($ctrlName = null) {
 		$arr = String::tokenize($ctrlName, '/');
 		if (count($arr) == 2) {
@@ -179,7 +284,6 @@ class GroupsController extends AppController {
 			return false;
 		}
 	}
-	
 	function _getPluginControllerName($ctrlName = null) {
 		$arr = String::tokenize($ctrlName, '/');
 		if (count($arr) == 2) {
@@ -188,7 +292,6 @@ class GroupsController extends AppController {
 			return false;
 		}
 	}
-	
 	/**
 	 * Get the names of the plugin controllers ...
 	 *
@@ -201,33 +304,44 @@ class GroupsController extends AppController {
 	 */
 	function _getPluginControllerNames() {
 		App::import('Core', 'File', 'Folder');
+
 		App::uses('File', 'Utility');
 		App::uses('Folder', 'Utility');
 		
-		$paths = Configure::bootstrap();
-		$folder = & new Folder();
-		$folder->cd(APP . 'plugins');
-	
+		$pluginPath = APP . 'Plugin';
+		$folder =& new Folder();
+		$folder->cd($pluginPath);
 		// Get the list of plugins
 		$Plugins = $folder->read();
+		
+		
 		$Plugins = $Plugins[0];
 		$arr = array();
-	
+		
+		
+		
 		// Loop through the plugins
+		if($Plugins)
 		foreach($Plugins as $pluginName) {
 			// Change directory to the plugin
-			$didCD = $folder->cd(APP . 'plugins'. DS . $pluginName . DS . 'controllers');
+			$didCD = $folder->cd($pluginPath . DS . $pluginName . DS . 'Controller');
+			if(!$didCD) continue;
+			
 			// Get a list of the files that have a file name that ends
 			// with controller.php
-			$files = $folder->findRecursive('.*_controller\.php');
-	
+			$files = array();
+			$files = $folder->findRecursive('.*Controller\.php');
+			
+			
 			// Loop through the controllers we found in the plugins directory
 			foreach($files as $fileName) {
 				// Get the base file name
 				$file = basename($fileName);
-	
+
 				// Get the controller name
-				$file = Inflector::camelize(substr($file, 0, strlen($file)-strlen('_controller.php')));
+				$file = Inflector::camelize(substr($file, 0, strlen($file)-strlen('Controller.php')));
+				
+				
 				if (!preg_match('/^'. Inflector::humanize($pluginName). 'App/', $file)) {
 					if (!App::import('Controller', $pluginName.'.'.$file)) {
 						debug('Error importing '.$file.' for plugin '.$pluginName);
@@ -239,6 +353,8 @@ class GroupsController extends AppController {
 				}
 			}
 		}
+		
 		return $arr;
 	}
+	
 }

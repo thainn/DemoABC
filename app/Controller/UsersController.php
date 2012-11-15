@@ -4,7 +4,7 @@ class UsersController extends AppController {
 
 	function beforeFilter() {
 		parent::beforeFilter();
-		// 		$this->Auth->allow(array('*'));
+				$this->Auth->allow(array('*'));
 	}
 
 	function add() {
@@ -44,51 +44,57 @@ class UsersController extends AppController {
 	}
 
 	function initDB() {
+		
 		$group =& $this->User->Group;
-		//cho phép administrators truy cập mọi thứ
+		
+		//Allow admins to everything
 		$group->id = 1;
 		$this->Acl->allow($group, 'controllers');
-
-		//cho phép managers quản lý post, cấm truy xuất khu vực và action khác
-		$group->id = 2;
-		$this->Acl->deny($group, 'controllers');
-		$this->Acl->allow($group, 'controllers/Posts');
-
-		//cho phép users chỉ được add và edit post, cấm truy xuất các khu vực và action khác
-		$group->id = 3;
-		$this->Acl->deny($group, 'controllers');
-		$this->Acl->allow($group, 'controllers/Posts/add');
-		$this->Acl->allow($group, 'controllers/Posts/edit');
-		$this->Acl->allow($group, 'controllers/Widgets/add');
-		$this->Acl->allow($group, 'controllers/Widgets/edit');
-
+		//allow managers to posts and widgets
+// 		$group->id = 2;
+// 		$this->Acl->deny($group, 'controllers');
+// 		$this->Acl->allow($group, 'controllers/Posts');
+// 		$this->Acl->allow($group, 'controllers/Widgets');
+// 		//allow users to only add and edit on posts and widgets
+// 		$group->id = 3;
+// 		$this->Acl->deny($group, 'controllers');
+// 		$this->Acl->allow($group, 'controllers/News/view');
+// 		$this->Acl->allow($group, 'controllers/News/add');
+// 		$this->Acl->allow($group, 'controllers/News/edit');
+// 		$this->Acl->allow($group, 'controllers/Recruits/view');
+// 		$this->Acl->allow($group, 'controllers/Recruits/edit');
+// 		//we add an exit to avoid an ugly "missing views" error message
 		echo "all done";
 		exit;
 	}
+	
 
+	
+	public function login() {
+		if ($this->Session->read('Auth.User')) {
+			$this->Session->setFlash('You are logged in!');
+			$this->redirect('/', null, false);
+		}
+		if ($this->request->is('post')) {
+			if ($this->Auth->login()) {
+				$this->redirect($this->Auth->redirect());
+			} else {
+				$this->Session->setFlash('Your username or password was incorrect.');
+			}
+		}
+		
+	}
+	
+	public function logout() {
+		$this->Session->setFlash('Good-Bye');
+		$this->redirect($this->Auth->logout());
+	}
+	
 	function index() {
 		$this->set('users', $this->paginate()); // mac dinh la 20 items
 	}
-
-	function login() {
-		if ($this->request->is('post')) {
-		 	if ($this->Auth->login()) {
-		 			
-		 		$data['User'] = $this->Auth->user();
 	
-		 		//var_dump($data['User']['username']);
-		 		$this->Session->write('username',$data['User']['username']);
-		 		// return;
-		 		$this->redirect($this->Auth->redirect());
-		 	} else {
-		 		$this->Session->setFlash('Your username or password was incorrect.');
-		 	}
-		}
-	}
-
-	function logout() {
-
-	}
+	
 	function view($id=null) {
 
 	}

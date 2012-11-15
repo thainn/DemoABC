@@ -38,28 +38,23 @@ echo $this->fetch('script');
 
 			<!--                   luu session cakephp-->
 			<?php 
-			if($this->Session->read('username')!=null)
-			{
+		
+			$user = $this->Session->read('Auth.User');
+			if($user['id']) {
 				?>
-			<font color="red"> Xin chào <?php 
-
-			 
-
-			//var_dump($data['User']['username']);
-			echo $this->Session->read('username');
-
-
-			?>
-				<div style="color: red">
+				<style>
+					#header a{
+						color: #EE5F5B;
+					}
+				</style>
+					Xin chào <b><?php echo $user['username']; ?></b> |
 					<?php 
-					 
 					echo $this->Html->link(
-                    'Logout',
-                    array('controller' => 'users', 'action' => 'logout')
-                              );
-
-                        ?></div>
-			</font>
+						                    'Logout',
+						                    array('controller' => 'users', 'action' => 'logout')
+										);
+                        ?>
+				</div>
 			<?php } ?>
 		</div>
 		<div id="content">
