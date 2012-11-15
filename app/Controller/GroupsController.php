@@ -39,10 +39,9 @@ class GroupsController extends AppController {
 	}
 
 	function _setPermission() {
+		$rules = array();
 		$this->Acl->Aco->unbindModel(array('hasAndBelongsToMany' => array('Aro')));
 		$rules_temp = $this->Acl->Aco->find('all');
-		
-		$rules = array();
 		foreach($rules_temp as $item){
 			$rules[$item['Aco']['id']] = $item;
 		}
@@ -52,7 +51,7 @@ class GroupsController extends AppController {
 			$sql = 'delete from  aros_acos WHERE aro_id =' . $key;
 			$this->Acl->Aco->query($sql);
 			
-			$group = &$this->Group;
+			$group = $this->Group;
 			$group->id = $key; 
 			
 			$parent_id  	= 0;

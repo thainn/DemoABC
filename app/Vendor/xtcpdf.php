@@ -22,12 +22,12 @@ class XTCPDF  extends TCPDF
     function Header() 
     { 
 
-        list($r, $b, $g) = $this->xheadercolor; 
-        $this->setY(10); // shouldn't be needed due to page margin, but helas, otherwise it's at the page top 
-        $this->SetFillColor($r, $b, $g); 
-        $this->SetTextColor(0 , 0, 0); 
-        $this->Cell(0,20, '', 0,1,'C', 1); 
-        $this->Text(15,26,$this->xheadertext ); 
+        //list($r, $b, $g) = $this->xheadercolor; 
+       // $this->setY(10); // shouldn't be needed due to page margin, but helas, otherwise it's at the page top 
+        //$this->SetFillColor($r, $b, $g); 
+        //$this->SetTextColor(0 , 0, 0); 
+       // $this->Cell(0,20, '', 0,1,'C', 1); 
+       // $this->Text(15,26,$this->xheadertext ); 
     } 
 
     /** 
@@ -37,12 +37,12 @@ class XTCPDF  extends TCPDF
     */ 
     function Footer() 
     { 
-        $year = date('Y'); 
-        $footertext = sprintf($this->xfootertext, $year); 
-        $this->SetY(-20); 
-        $this->SetTextColor(0, 0, 0); 
-        $this->SetFont($this->xfooterfont,'',$this->xfooterfontsize); 
-        $this->Cell(0,8, $footertext,'T',1,'C'); 
+        //$year = date('Y'); 
+       // $footertext = sprintf($this->xfootertext, $year); 
+       // $this->SetY(-20); 
+       // $this->SetTextColor(0, 0, 0); 
+       // $this->SetFont($this->xfooterfont,'',$this->xfooterfontsize); 
+        //$this->Cell(0,8, $footertext,'T',1,'C'); 
     } 
 } 
 ?>
