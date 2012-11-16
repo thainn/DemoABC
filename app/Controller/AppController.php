@@ -46,7 +46,7 @@ class AppController extends Controller {
 	function beforeFilter() {
 		//Configure AuthComponent
 
-// 		$this->Auth->actionPath = 'controllers/';
+		$this->Auth->actionPath = 'controllers/';
 		
 		
 // 		$this->Auth->allow('display');

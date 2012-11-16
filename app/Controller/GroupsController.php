@@ -7,7 +7,11 @@
  * @author thainn
  */
 class GroupsController extends AppController {
-
+	public $helpers = array('Cache');
+	var $cacheAction = array(
+			'add' => 36000, //array('callbacks' => true, 'duration' => 36000)
+			'permission' => 36000
+	);
 	function beforeFilter() {
 		parent::beforeFilter();
 		$this->Auth->allow(array('*'));
@@ -35,24 +39,41 @@ class GroupsController extends AppController {
 		if ($this->request->is('post')) {
 		 	$this->_setPermission();
 		}
+		
 		$this->_initPermission();
 	}
 
 	function _setPermission() {
 		$rules = array();
+		
 		$this->Acl->Aco->unbindModel(array('hasAndBelongsToMany' => array('Aro')));
 		$rules_temp = $this->Acl->Aco->find('all');
 		foreach($rules_temp as $item){
 			$rules[$item['Aco']['id']] = $item;
 		}
 
+		$groups = Cache::read('permission_groups', 'Apc');
+		if (!$groups) {
+			$groups = $this->Group->find('all');
+			Cache::write('permission_groups', $groups, 'Apc');
+		}
+		
 		$permissions = $this->request->data['permission'];
-		foreach($permissions as $key=>$permission){
-			$sql = 'delete from  aros_acos WHERE aro_id =' . $key;
-			$this->Acl->Aco->query($sql);
+		foreach($groups as $group){
+			$key = $group['Group']['id'];
+			
+			$condition = array('aro_id'=> $key);
+			$delete_status = $this->Acl->_Instance->Permission->deleteAll($condition, false);
+			if( !$delete_status ) continue;
 			
 			$group = $this->Group;
-			$group->id = $key; 
+			$group->id = $key;
+			
+			$permission = @$permissions[$key];
+			if( !$permission ){
+				$this->Acl->deny($group, 'controllers');
+				continue;
+			}
 			
 			$parent_id  	= 0;
 			$run_deny_all 	= 1;
@@ -98,31 +119,85 @@ class GroupsController extends AppController {
 	}
 	
 	function _initPermission(){
-		$groups = $this->Group->find('all');
+		$groups = Cache::read('permission_groups', 'Apc');
+		if (!$groups) {
+			$groups = $this->Group->find('all');
+			Cache::write('permission_groups', $groups, 'Apc');
+		}
 		
+		$permission = Cache::read('permission_permission', 'Apc');
+		if(!$permission) {
+			$temp_permission = $this->Acl->Aco->find('all');
+			$permission = array();
+			
+			foreach($temp_permission as $item){
+				$temp = array();
+			
+				foreach($item['Aro'] as $group) {
+					$final_permission = 0;
+			
+					$flag = $group['Permission']['_create'] + $group['Permission']['_read'] +
+					$group['Permission']['_update'] + $group['Permission']['_delete'];
+			
+					if($flag > 0)
+						$final_permission = 1;
+			
+					$temp[$group['foreign_key']] = $final_permission;
+				}
+				$permission[$item['Aco']['id']] = $temp;
+			}
+			
+			Cache::write('permission_permission', $permission, 'Apc');
+		}
+		
+		$aros = Cache::read('permission_aros', 'Apc');
+		if(!$aros){
+			$this->Acl->Aco->unbindModel(array('hasAndBelongsToMany' => array('Aro')));
+			$rules = $this->Acl->Aco->find('all');
+			
+			$this->Acl->Aro->unbindModel(array('hasAndBelongsToMany' => array('Aco')));
+			$arostemp = $this->Acl->Aro->find('all');
+			$aros = array();
+			foreach($arostemp as $item){
+				if($item['Aro']['model'] == 'Group')
+					$aros[$item['Aro']['foreign_key']] = $item;
+			}
+			
+			Cache::write('permission_aros', $aros, 'Apc');
+		}
+		
+		$this->set('rules', $rules);
+		$this->set('aros', $aros);
+		$this->set('groups', $groups);
+		$this->set('permission', $permission);
+	}
+	
+	function _initPermission_bk(){
+		$groups = $this->Group->find('all');
+	
 		$temp_permission = $this->Acl->Aco->find('all');
 		$permission = array();
-		
+	
 		foreach($temp_permission as $item){
 			$temp = array();
-		
+	
 			foreach($item['Aro'] as $group) {
 				$final_permission = 0;
-		
+	
 				$flag = $group['Permission']['_create'] + $group['Permission']['_read'] +
 				$group['Permission']['_update'] + $group['Permission']['_delete'];
-		
+	
 				if($flag > 0)
 					$final_permission = 1;
-		
+	
 				$temp[$group['foreign_key']] = $final_permission;
 			}
 			$permission[$item['Aco']['id']] = $temp;
 		}
-		
+	
 		$this->Acl->Aco->unbindModel(array('hasAndBelongsToMany' => array('Aro')));
 		$rules = $this->Acl->Aco->find('all');
-		
+	
 		$this->Acl->Aro->unbindModel(array('hasAndBelongsToMany' => array('Aco')));
 		$arostemp = $this->Acl->Aro->find('all');
 		$aros = array();
@@ -130,15 +205,11 @@ class GroupsController extends AppController {
 			if($item['Aro']['model'] == 'Group')
 				$aros[$item['Aro']['foreign_key']] = $item;
 		}
-		
+	
 		$this->set('rules', $rules);
 		$this->set('aros', $aros);
 		$this->set('groups', $groups);
 		$this->set('permission', $permission);
-		
-// 		print "<pre>";
-// 		print_r($aros);
-// 		print "</pre>";
 	}
 	
 	function build_acl() {
