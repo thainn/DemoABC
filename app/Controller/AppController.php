@@ -47,9 +47,13 @@ class AppController extends Controller {
 		//Configure AuthComponent
 
 		$this->Auth->actionPath = 'controllers/';
+// 		$user = $this->Session->read('Auth.User');
+// 		$groupId = $user['Group']['id'];
+// 		$this->Acl->Aro->find('all', array('conditions'=> array('model'=>'Group', 'foreign_key'=>$groupId))) // get group permission		
 		
+
 		
-// 		$this->Auth->allow('display');
+		$this->Auth->allow('display');
 		//Configure AuthComponent
 		$this->Auth->loginAction = array('controller' => 'users', 'action' => 'login');
 		$this->Auth->logoutRedirect = array('controller' => 'users', 'action' => 'logout');
